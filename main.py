@@ -70,10 +70,11 @@ def download_pdf_from_drive(file_id: str) -> tuple[io.BytesIO, dict]:
     """Google DriveからPDFをダウンロード"""
     drive_service = get_drive_service()
 
-    # ファイルメタデータを取得
+    # ファイルメタデータを取得（共有ドライブ対応）
     file_metadata = drive_service.files().get(
         fileId=file_id,
-        fields='name,mimeType,size'
+        fields='name,mimeType,size',
+        supportsAllDrives=True
     ).execute()
 
     if file_metadata.get('mimeType') != 'application/pdf':
@@ -84,8 +85,8 @@ def download_pdf_from_drive(file_id: str) -> tuple[io.BytesIO, dict]:
     if file_size > 100 * 1024 * 1024:
         raise ValueError('File size exceeds 100MB limit')
 
-    # PDFをダウンロード
-    request_file = drive_service.files().get_media(fileId=file_id)
+    # PDFをダウンロード（共有ドライブ対応）
+    request_file = drive_service.files().get_media(fileId=file_id, supportsAllDrives=True)
     pdf_buffer = io.BytesIO()
     downloader = MediaIoBaseDownload(pdf_buffer, request_file)
 
